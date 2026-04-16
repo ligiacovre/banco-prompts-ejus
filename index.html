@@ -528,7 +528,7 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== SUPABASE CDN ===== -->
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
 // ===== CONFIG =====
@@ -537,13 +537,19 @@ const SUPABASE_ANON_KEY = 'sb_publishable_CKR_NkfYjtHKFCpcO0Q3ag_FcLBALIJ';
 
 let supabase;
 try {
-    // A SDK UMD expoe window.supabase com createClient
-    const sb = window.supabase;
-    supabase = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    if (!window.supabase || !window.supabase.createClient) {
+        throw new Error('SDK nao carregou');
+    }
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('Supabase inicializado com sucesso');
 } catch (e) {
     console.error('Erro ao inicializar Supabase:', e);
-    alert('Erro ao conectar com o banco de dados. Recarregue a p\u00e1gina.');
+    document.addEventListener('DOMContentLoaded', () => {
+        const overlay = document.getElementById('authOverlay');
+        if (overlay) {
+            overlay.innerHTML = '<div style="text-align:center;color:#fff;padding:40px;max-width:500px"><h2 style="margin-bottom:16px">Erro ao carregar</h2><p style="margin-bottom:24px">Nao foi possivel conectar ao servidor. Tente recarregar a pagina.</p><button onclick="location.reload()" style="padding:12px 32px;background:#D4A843;color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer">Recarregar</button></div>';
+        }
+    });
 }
 
 // ===== STATE =====
@@ -904,7 +910,7 @@ function renderCard(prompt) {
             <p class="card-description">${escapeHtml(prompt.description || '')}</p>
             <div class="card-prompt expandable ${isLong ? 'collapsed' : ''}">${escapeHtml(prompt.content)}</div>
             <div class="card-footer">
-                <span class="card-author">${currentTab === 'comunidade' ? 'por ' + escapeHtml(authorName) : (currentTab === 'oficial' ? 'Oficial EJUS' : 'Pessoal')}</span>
+                <span class="card-author">${currentTab === 'comunidade' ? 'por ' + escapeHtml(authorName) : (currentTab === 'oficial' ? 'Oficial LegalCode' : 'Pessoal')}</span>
                 <button class="btn-copy" data-content="${escapeAttr(prompt.content)}">Copiar</button>
             </div>
         </div>
