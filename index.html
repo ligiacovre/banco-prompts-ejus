@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Banco de Prompts &mdash; IA Aplicada &agrave; Pr&aacute;tica Jurisdicional | EJUS/TJSP">
+    <title>Banco de Prompts | IA Aplicada &agrave; Pr&aacute;tica Jurisdicional &mdash; EJUS/TJSP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #2C3E50;
+            line-height: 1.6;
+            background: #F5F6FA;
+            min-height: 100vh;
+        }
+        ::selection { background: #D4A843; color: #FFF; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #E8EAF0; }
+        ::-webkit-scrollbar-thumb { background: #D4A843; border-radius: 4px; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; font-weight: 700; line-height: 1.2; }
+        a { text-decoration: none; color: inherit; }
+        button { cursor: pointer; font-family: 'Open Sans', sans-serif; border: none; }
+        input, textarea, select { font-family: 'Open Sans', sans-serif; }
+
+        /* ===== AUTH SCREEN ===== */
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: linear-gradient(135deg, #0D1117 0%, #1B2838 50%, #0D1117 100%);
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .auth-overlay.hidden { opacity: 0; pointer-events: none; }
+        .auth-card {
+            background: #FFF; border-radius: 16px; padding: 48px 40px;
+            max-width: 440px; width: 90%; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .auth-card h1 { font-size: 1.5rem; color: #1B2838; margin-bottom: 4px; }
+        .auth-card .subtitle { color: #7F8C8D; font-size: 0.9rem; margin-bottom: 32px; }
+        .auth-card .ejus-badge {
+            display: inline-block; background: #1B2838; color: #D4A843;
+            font-family: 'Montserrat', sans-serif; font-weight: 700;
+            padding: 6px 16px; border-radius: 6px; font-size: 0.8rem;
+            letter-spacing: 1px; margin-bottom: 24px;
+        }
+        .auth-input {
+            width: 100%; padding: 14px 16px; border: 2px solid #E8EAF0;
+            border-radius: 10px; font-size: 1rem; margin-bottom: 12px;
+            transition: border-color 0.3s;
+        }
+        .auth-input:focus { outline: none; border-color: #D4A843; }
+        .auth-btn {
+            width: 100%; padding: 14px; background: #1B2838; color: #FFF;
+            border-radius: 10px; font-size: 1rem; font-weight: 600;
+            transition: background 0.3s; margin-top: 8px;
+        }
+        .auth-btn:hover { background: #2C3E50; }
+        .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .auth-toggle { color: #D4A843; font-size: 0.85rem; margin-top: 16px; cursor: pointer; }
+        .auth-toggle:hover { text-decoration: underline; }
+        .auth-msg { font-size: 0.85rem; margin-top: 12px; padding: 8px; border-radius: 6px; }
+        .auth-msg.success { background: #E8F8F0; color: #27AE60; }
+        .auth-msg.error { background: #FDEDEC; color: #E74C3C; }
+        .auth-name-field { display: none; }
+        .auth-name-field.show { display: block; }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, #1B2838, #0D1117);
+            padding: 20px 0; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+        }
+        .header-inner {
+            max-width: 1280px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-logo {
+            font-family: 'Montserrat', sans-serif; font-weight: 800;
+            font-size: 1.3rem; color: #FFF;
+        }
+        .header-logo span { color: #D4A843; }
+        .header-badge {
+            background: rgba(212,168,67,0.15); color: #D4A843;
+            font-size: 0.7rem; font-weight: 700; padding: 4px 10px;
+            border-radius: 20px; letter-spacing: 0.5px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .user-info { color: rgba(255,255,255,0.7); font-size: 0.85rem; }
+        .user-info strong { color: #FFF; }
+        .btn-logout {
+            background: rgba(255,255,255,0.1); color: #FFF;
+            padding: 8px 16px; border-radius: 8px; font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+        /* ===== DISCLAIMER BANNER ===== */
+        .disclaimer-banner {
+            background: #FEF9E7; border-bottom: 2px solid #F39C12;
+            padding: 10px 24px; text-align: center; font-size: 0.82rem; color: #7D6608;
+        }
+        .disclaimer-banner strong { color: #E67E22; }
+
+        /* ===== TABS ===== */
+        .tabs-container {
+            max-width: 1280px; margin: 0 auto; padding: 24px 24px 0;
+        }
+        .tabs {
+            display: flex; gap: 4px; background: #E8EAF0;
+            border-radius: 12px; padding: 4px; width: fit-content;
+        }
+        .tab-btn {
+            padding: 10px 24px; border-radius: 10px; font-size: 0.9rem;
+            font-weight: 600; color: #7F8C8D; background: transparent;
+            transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .tab-btn:hover { color: #2C3E50; }
+        .tab-btn.active {
+            background: #FFF; color: #1B2838;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .tab-btn .tab-count {
+            background: #E8EAF0; color: #7F8C8D;
+            font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
+            font-weight: 700;
+        }
+        .tab-btn.active .tab-count { background: #1B2838; color: #D4A843; }
+
+        /* ===== MAIN CONTENT ===== */
+        .main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px; }
+
+        /* ===== SEARCH & FILTERS ===== */
+        .controls {
+            display: flex; gap: 12px; margin-bottom: 24px;
+            flex-wrap: wrap; align-items: center;
+        }
+        .search-box {
+            flex: 1; min-width: 250px; position: relative;
+        }
+        .search-box input {
+            width: 100%; padding: 12px 16px 12px 44px;
+            border: 2px solid #E8EAF0; border-radius: 10px;
+            font-size: 0.95rem; transition: border-color 0.3s;
+            background: #FFF;
+        }
+        .search-box input:focus { outline: none; border-color: #D4A843; }
+        .search-box::before {
+            content: '\1F50D'; position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%); font-size: 1.1rem;
+        }
+        .filter-select {
+            padding: 12px 16px; border: 2px solid #E8EAF0;
+            border-radius: 10px; font-size: 0.9rem; background: #FFF;
+            min-width: 180px; transition: border-color 0.3s;
+        }
+        .filter-select:focus { outline: none; border-color: #D4A843; }
+        .btn-add-prompt {
+            padding: 12px 24px; background: #D4A843; color: #FFF;
+            border-radius: 10px; font-weight: 600; font-size: 0.9rem;
+            transition: background 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-add-prompt:hover { background: #c49a3a; }
+
+        /* ===== PROMPT CARDS ===== */
+        .prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .prompt-card {
+            background: #FFF; border-radius: 14px; padding: 24px;
+            border: 1px solid #E8EAF0; transition: all 0.3s;
+            display: flex; flex-direction: column;
+        }
+        .prompt-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .card-category {
+            font-size: 0.7rem; font-weight: 700; padding: 4px 10px;
+            border-radius: 6px; letter-spacing: 0.5px; text-transform: uppercase;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .cat-peticoes { background: #EBF5FB; color: #2980B9; }
+        .cat-analise { background: #F5EEF8; color: #8E44AD; }
+        .cat-resumo { background: #E8F8F0; color: #27AE60; }
+        .cat-pesquisa { background: #FEF9E7; color: #E67E22; }
+        .cat-estrategia { background: #FDEDEC; color: #E74C3C; }
+        .cat-geral { background: #E8EAF0; color: #7F8C8D; }
+        .cat-outro { background: #E8EAF0; color: #7F8C8D; }
+        .card-actions-top { display: flex; gap: 6px; }
+        .btn-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: #F5F6FA; transition: all 0.3s; font-size: 0.9rem;
+        }
+        .btn-icon:hover { background: #E8EAF0; }
+        .btn-icon.saved { background: #FEF9E7; }
+        .card-title {
+            font-size: 1.05rem; font-weight: 700; color: #1B2838;
+            margin-bottom: 8px;
+        }
+        .card-description {
+            font-size: 0.85rem; color: #7F8C8D; margin-bottom: 16px;
+            flex: 1;
+        }
+        .card-prompt {
+            background: #F5F6FA; border-radius: 10px; padding: 16px;
+            font-size: 0.85rem; color: #2C3E50; line-height: 1.5;
+            margin-bottom: 16px; max-height: 120px; overflow-y: auto;
+            white-space: pre-wrap; word-break: break-word;
+            border-left: 3px solid #D4A843;
+        }
+        .card-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 12px; border-top: 1px solid #F0F0F0;
+        }
+        .card-author { font-size: 0.78rem; color: #95A5A6; }
+        .btn-copy {
+            padding: 8px 16px; background: #1B2838; color: #FFF;
+            border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+            transition: all 0.3s; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-copy:hover { background: #2C3E50; }
+        .btn-copy.copied { background: #27AE60; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center; padding: 60px 20px; color: #95A5A6;
+        }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state h3 { font-size: 1.2rem; color: #7F8C8D; margin-bottom: 8px; }
+        .empty-state p { font-size: 0.9rem; max-width: 400px; margin: 0 auto; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal {
+            background: #FFF; border-radius: 16px; padding: 32px;
+            max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;
+            transform: translateY(20px); transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        .modal h2 { font-size: 1.3rem; color: #1B2838; margin-bottom: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block; font-weight: 600; font-size: 0.85rem;
+            color: #2C3E50; margin-bottom: 6px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 12px 14px; border: 2px solid #E8EAF0;
+            border-radius: 10px; font-size: 0.9rem; transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none; border-color: #D4A843;
+        }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+        .btn-cancel {
+            padding: 12px 24px; background: #E8EAF0; color: #7F8C8D;
+            border-radius: 10px; font-weight: 600;
+        }
+        .btn-submit {
+            padding: 12px 24px; background: #D4A843; color: #FFF;
+            border-radius: 10px; font-weight: 600; transition: background 0.3s;
+        }
+        .btn-submit:hover { background: #c49a3a; }
+        .community-notice {
+            background: #EBF5FB; border-radius: 8px; padding: 12px;
+            font-size: 0.82rem; color: #2980B9; margin-bottom: 16px;
+            border-left: 3px solid #3498DB;
+        }
+
+        /* ===== ADMIN BADGE ===== */
+        .admin-badge {
+            background: #D4A843; color: #FFF; font-size: 0.65rem;
+            padding: 2px 8px; border-radius: 4px; font-weight: 700;
+            font-family: 'Montserrat', sans-serif; letter-spacing: 0.5px;
+        }
+
+        /* ===== LOADING ===== */
+        .loading { text-align: center; padding: 40px; }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #E8EAF0;
+            border-top-color: #D4A843; border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast {
+            background: #1B2838; color: #FFF; padding: 14px 20px;
+            border-radius: 10px; font-size: 0.85rem; font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .toast.success { border-left: 4px solid #27AE60; }
+        .toast.error { border-left: 4px solid #E74C3C; }
+        .toast.info { border-left: 4px solid #3498DB; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #1B2838; color: rgba(255,255,255,0.5);
+            text-align: center; padding: 20px; font-size: 0.8rem;
+            margin-top: auto;
+        }
+        .footer a { color: #D4A843; }
+        .footer .quote {
+            font-style: italic; color: rgba(255,255,255,0.3);
+            margin-top: 6px; font-size: 0.75rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header-inner { flex-direction: column; gap: 12px; text-align: center; }
+            .tabs { width: 100%; overflow-x: auto; }
+            .tab-btn { font-size: 0.8rem; padding: 8px 16px; white-space: nowrap; }
+            .controls { flex-direction: column; }
+            .search-box { min-width: 100%; }
+            .prompts-grid { grid-template-columns: 1fr; }
+            .btn-add-prompt { width: 100%; justify-content: center; }
+        }
+
+        /* ===== EXPAND PROMPT ===== */
+        .card-prompt.expandable { cursor: pointer; position: relative; }
+        .card-prompt.expandable.collapsed::after {
+            content: 'Clique para expandir';
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, #F5F6FA);
+            padding: 8px; text-align: center; font-size: 0.75rem;
+            color: #D4A843; font-weight: 600;
+        }
+        .card-prompt.expanded { max-height: none; }
+
+        /* ===== DELETE BTN ===== */
+        .btn-icon.delete:hover { background: #FDEDEC; color: #E74C3C; }
+    </style>
+</head>
+<body>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+        <div class="ejus-badge">EJUS &bull; TJSP</div>
+        <h1>Banco de Prompts</h1>
+        <p class="subtitle">IA Aplicada &agrave; Pr&aacute;tica Jurisdicional</p>
+
+        <form id="authForm">
+            <div class="auth-name-field" id="nameField">
+                <input type="text" class="auth-input" id="authName" placeholder="Seu nome completo">
+            </div>
+            <input type="email" class="auth-input" id="authEmail" placeholder="Seu email" required>
+            <input type="password" class="auth-input" id="authPassword" placeholder="Sua senha (min. 6 caracteres)" required minlength="6">
+            <button type="submit" class="auth-btn" id="authBtn">Entrar</button>
+        </form>
+
+        <p class="auth-toggle" id="authToggle">N&atilde;o tem conta? <strong>Cadastre-se</strong></p>
+        <div id="authMsg"></div>
+    </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" style="display:none; min-height:100vh; display:flex; flex-direction:column;">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="header-logo">Banco de <span>Prompts</span></div>
+                <span class="header-badge">EJUS / TJSP</span>
+            </div>
+            <div class="header-right">
+                <span class="user-info">Ol&aacute;, <strong id="userName">Aluno</strong></span>
+                <span id="adminBadge" class="admin-badge" style="display:none;">ADMIN</span>
+                <button class="btn-logout" id="btnLogout">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer-banner">
+        <strong>Aviso:</strong> Os prompts da aba "Comunidade" s&atilde;o contribui&ccedil;&otilde;es colaborativas dos participantes do curso.
+        O conte&uacute;do n&atilde;o &eacute; oficial e n&atilde;o representa a posi&ccedil;&atilde;o da EJUS, do TJSP ou da instrutora.
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="oficial">
+                Biblioteca Oficial <span class="tab-count" id="countOficial">0</span>
+            </button>
+            <button class="tab-btn" data-tab="comunidade">
+                Comunidade <span class="tab-count" id="countComunidade">0</span>
+            </button>
+            <button class="tab-btn" data-tab="meus">
+                Meus Prompts <span class="tab-count" id="countMeus">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="main" style="flex:1;">
+        <!-- CONTROLS -->
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar prompts...">
+            </div>
+            <select class="filter-select" id="filterCategory">
+                <option value="">Todas as categorias</option>
+                <option value="peticoes">Peti&ccedil;&otilde;es</option>
+                <option value="analise">An&aacute;lise</option>
+                <option value="resumo">Resumo</option>
+                <option value="pesquisa">Pesquisa</option>
+                <option value="estrategia">Estrat&eacute;gia</option>
+                <option value="geral">Geral</option>
+            </select>
+            <button class="btn-add-prompt" id="btnAddPrompt">+ Novo Prompt</button>
+        </div>
+
+        <!-- PROMPTS GRID -->
+        <div id="promptsGrid" class="prompts-grid"></div>
+
+        <!-- LOADING -->
+        <div id="loadingState" class="loading" style="display:none;">
+            <div class="spinner"></div>
+            <p>Carregando prompts...</p>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon">&#128221;</div>
+            <h3 id="emptyTitle">Nenhum prompt encontrado</h3>
+            <p id="emptyText">Que tal ser o primeiro a contribuir?</p>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <p>Banco de Prompts &mdash; IA Aplicada &agrave; Pr&aacute;tica Jurisdicional | <a href="#">EJUS/TJSP</a></p>
+        <p class="quote">&ldquo;Ferramentas v&ecirc;m e v&atilde;o. O conhecimento fica. Compartilhado, multiplica-se.&rdquo; &mdash; L&iacute;gia Covre da Silva</p>
+    </footer>
+</div>
+
+<!-- ===== MODAL: NEW PROMPT ===== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h2 id="modalTitle">Novo Prompt</h2>
+        <div class="community-notice" id="communityNotice" style="display:none;">
+            Este prompt ser&aacute; compartilhado com todos os participantes do curso.
+            Ao publicar, voc&ecirc; concorda que o conte&uacute;do &eacute; de sua autoria ou de dom&iacute;nio p&uacute;blico.
+        </div>
+        <form id="promptForm">
+            <input type="hidden" id="promptId">
+            <div class="form-group">
+                <label>T&iacute;tulo</label>
+                <input type="text" id="promptTitle" placeholder="Ex.: Resumo de Jurisprud&ecirc;ncia" required>
+            </div>
+            <div class="form-group">
+                <label>Categoria</label>
+                <select id="promptCategory" required>
+                    <option value="">Selecione...</option>
+                    <option value="peticoes">Peti&ccedil;&otilde;es</option>
+                    <option value="analise">An&aacute;lise</option>
+                    <option value="resumo">Resumo</option>
+                    <option value="pesquisa">Pesquisa</option>
+                    <option value="estrategia">Estrat&eacute;gia</option>
+                    <option value="geral">Geral</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descri&ccedil;&atilde;o breve</label>
+                <input type="text" id="promptDescription" placeholder="Para que serve este prompt?" required>
+            </div>
+            <div class="form-group">
+                <label>Prompt</label>
+                <textarea id="promptContent" placeholder="Cole ou escreva o prompt aqui..." required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="btnCancelModal">Cancelar</button>
+                <button type="submit" class="btn-submit">Publicar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== SUPABASE CDN ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+// ===== CONFIG =====
+const SUPABASE_URL = 'https://iinywkixyzqvjfegvsff.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_CKR_NkfYjtHKFCpcO0Q3ag_FcLBALIJ';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== STATE =====
+let currentUser = null;
+let currentTab = 'oficial';
+let isAdmin = false;
+let isSignUp = false;
+let allPrompts = [];
+
+// ===== CATEGORY LABELS =====
+const CATEGORY_LABELS = {
+    peticoes: 'Peti\u00e7\u00f5es',
+    analise: 'An\u00e1lise',
+    resumo: 'Resumo',
+    pesquisa: 'Pesquisa',
+    estrategia: 'Estrat\u00e9gia',
+    geral: 'Geral',
+    outro: 'Outro'
+};
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check existing session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        await handleAuthSuccess(session.user);
+    }
+
+    // Auth state listener
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+            await handleAuthSuccess(session.user);
+        } else if (event === 'SIGNED_OUT') {
+            showAuth();
+        }
+    });
+
+    setupEventListeners();
+});
+
+// ===== AUTH =====
+function setupEventListeners() {
+    // Auth form
+    document.getElementById('authForm').addEventListener('submit', handleAuth);
+    document.getElementById('authToggle').addEventListener('click', toggleAuthMode);
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // Search & Filter
+    document.getElementById('searchInput').addEventListener('input', debounce(filterPrompts, 300));
+    document.getElementById('filterCategory').addEventListener('change', filterPrompts);
+
+    // Add prompt
+    document.getElementById('btnAddPrompt').addEventListener('click', openNewPromptModal);
+
+    // Modal
+    document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+    document.getElementById('promptForm').addEventListener('submit', handlePromptSubmit);
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', handleLogout);
+}
+
+function toggleAuthMode() {
+    isSignUp = !isSignUp;
+    const nameField = document.getElementById('nameField');
+    const authBtn = document.getElementById('authBtn');
+    const authToggle = document.getElementById('authToggle');
+
+    if (isSignUp) {
+        nameField.classList.add('show');
+        authBtn.textContent = 'Cadastrar';
+        authToggle.innerHTML = 'J\u00e1 tem conta? <strong>Entrar</strong>';
+    } else {
+        nameField.classList.remove('show');
+        authBtn.textContent = 'Entrar';
+        authToggle.innerHTML = 'N\u00e3o tem conta? <strong>Cadastre-se</strong>';
+    }
+    document.getElementById('authMsg').innerHTML = '';
+}
+
+async function handleAuth(e) {
+    e.preventDefault();
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const name = document.getElementById('authName').value.trim();
+    const authBtn = document.getElementById('authBtn');
+    const authMsg = document.getElementById('authMsg');
+
+    authBtn.disabled = true;
+    authBtn.textContent = 'Aguarde...';
+
+    try {
+        if (isSignUp) {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: { data: { full_name: name } }
+            });
+            if (error) throw error;
+
+            // Try to insert profile
+            if (data.user) {
+                await supabase.from('profiles').upsert({
+                    id: data.user.id,
+                    email: email,
+                    full_name: name,
+                    role: 'student'
+                });
+            }
+
+            if (data.session) {
+                // Auto-confirmed (email confirmation disabled)
+                await handleAuthSuccess(data.user);
+            } else {
+                authMsg.className = 'auth-msg success';
+                authMsg.textContent = 'Conta criada! Verifique seu email para confirmar.';
+            }
+        } else {
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            await handleAuthSuccess(data.user);
+        }
+    } catch (err) {
+        authMsg.className = 'auth-msg error';
+        let msg = err.message;
+        if (msg.includes('Invalid login')) msg = 'Email ou senha incorretos.';
+        if (msg.includes('already registered')) msg = 'Este email j\u00e1 est\u00e1 cadastrado. Fa\u00e7a login.';
+        if (msg.includes('Password should be')) msg = 'A senha deve ter no m\u00ednimo 6 caracteres.';
+        authMsg.textContent = msg;
+    } finally {
+        authBtn.disabled = false;
+        authBtn.textContent = isSignUp ? 'Cadastrar' : 'Entrar';
+    }
+}
+
+async function handleAuthSuccess(user) {
+    currentUser = user;
+
+    // Get profile
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    if (profile) {
+        isAdmin = profile.role === 'admin';
+        document.getElementById('userName').textContent = profile.full_name || user.email.split('@')[0];
+    } else {
+        // Create profile if not exists
+        await supabase.from('profiles').upsert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email.split('@')[0],
+            role: 'student'
+        });
+        isAdmin = false;
+        document.getElementById('userName').textContent = user.user_metadata?.full_name || user.email.split('@')[0];
+    }
+
+    document.getElementById('adminBadge').style.display = isAdmin ? 'inline' : 'none';
+    document.getElementById('authOverlay').classList.add('hidden');
+    document.getElementById('app').style.display = 'flex';
+
+    await loadPrompts();
+}
+
+function showAuth() {
+    currentUser = null;
+    isAdmin = false;
+    document.getElementById('authOverlay').classList.remove('hidden');
+    document.getElementById('app').style.display = 'none';
+}
+
+async function handleLogout() {
+    await supabase.auth.signOut();
+    showAuth();
+}
+
+// ===== TABS =====
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+
+    // Update add button text
+    const addBtn = document.getElementById('btnAddPrompt');
+    if (tab === 'oficial') {
+        addBtn.style.display = isAdmin ? 'flex' : 'none';
+        addBtn.textContent = '+ Novo Prompt Oficial';
+    } else if (tab === 'comunidade') {
+        addBtn.style.display = 'flex';
+        addBtn.textContent = '+ Compartilhar com a Comunidade';
+    } else {
+        addBtn.style.display = 'flex';
+        addBtn.textContent = '+ Novo Prompt Pessoal';
+    }
+
+    filterPrompts();
+}
+
+// ===== LOAD PROMPTS =====
+async function loadPrompts() {
+    showLoading(true);
+
+    try {
+        // Load all prompts
+        const { data: oficial, error: e1 } = await supabase
+            .from('prompts')
+            .select('*')
+            .eq('is_published', true)
+            .order('created_at', { ascending: false });
+
+        const { data: comunidade, error: e2 } = await supabase
+            .from('community_prompts')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        const { data: meus, error: e3 } = await supabase
+            .from('personal_prompts')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false });
+
+        if (e1) console.error('Erro prompts oficiais:', e1);
+        if (e2) console.error('Erro prompts comunidade:', e2);
+        if (e3) console.error('Erro prompts pessoais:', e3);
+
+        allPrompts = {
+            oficial: oficial || [],
+            comunidade: comunidade || [],
+            meus: meus || []
+        };
+
+        updateCounts();
+        filterPrompts();
+    } catch (err) {
+        showToast('Erro ao carregar prompts.', 'error');
+        console.error(err);
+    } finally {
+        showLoading(false);
+    }
+}
+
+function updateCounts() {
+    document.getElementById('countOficial').textContent = allPrompts.oficial.length;
+    document.getElementById('countComunidade').textContent = allPrompts.comunidade.length;
+    document.getElementById('countMeus').textContent = allPrompts.meus.length;
+}
+
+// ===== FILTER & RENDER =====
+function filterPrompts() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    const category = document.getElementById('filterCategory').value;
+    let prompts = allPrompts[currentTab] || [];
+
+    if (search) {
+        prompts = prompts.filter(p =>
+            p.title.toLowerCase().includes(search) ||
+            p.description?.toLowerCase().includes(search) ||
+            p.content.toLowerCase().includes(search)
+        );
+    }
+
+    if (category) {
+        prompts = prompts.filter(p => p.category === category);
+    }
+
+    renderPrompts(prompts);
+}
+
+function renderPrompts(prompts) {
+    const grid = document.getElementById('promptsGrid');
+    const emptyState = document.getElementById('emptyState');
+
+    if (prompts.length === 0) {
+        grid.innerHTML = '';
+        emptyState.style.display = 'block';
+        const emptyTitle = document.getElementById('emptyTitle');
+        const emptyText = document.getElementById('emptyText');
+
+        if (currentTab === 'oficial') {
+            emptyTitle.textContent = 'Nenhum prompt oficial ainda';
+            emptyText.textContent = 'Os prompts oficiais do curso ser\u00e3o adicionados em breve.';
+        } else if (currentTab === 'comunidade') {
+            emptyTitle.textContent = 'A comunidade ainda n\u00e3o compartilhou prompts';
+            emptyText.textContent = 'Seja o primeiro a compartilhar! Clique em "+ Compartilhar com a Comunidade".';
+        } else {
+            emptyTitle.textContent = 'Voc\u00ea ainda n\u00e3o salvou nenhum prompt';
+            emptyText.textContent = 'Crie prompts pessoais para organizar seus favoritos.';
+        }
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    grid.innerHTML = prompts.map(p => renderCard(p)).join('');
+
+    // Attach events
+    grid.querySelectorAll('.btn-copy').forEach(btn => {
+        btn.addEventListener('click', () => copyPrompt(btn));
+    });
+    grid.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => deletePrompt(btn.dataset.id, btn.dataset.table));
+    });
+    grid.querySelectorAll('.card-prompt.expandable').forEach(el => {
+        el.addEventListener('click', () => el.classList.toggle('collapsed'));
+    });
+}
+
+function renderCard(prompt) {
+    const catClass = `cat-${prompt.category || 'geral'}`;
+    const catLabel = CATEGORY_LABELS[prompt.category] || prompt.category || 'Geral';
+    const isLong = prompt.content.length > 200;
+    const canDelete = (currentTab === 'meus') ||
+                      (currentTab === 'comunidade' && prompt.user_id === currentUser?.id) ||
+                      (currentTab === 'oficial' && isAdmin);
+    const tableName = currentTab === 'oficial' ? 'prompts' : (currentTab === 'comunidade' ? 'community_prompts' : 'personal_prompts');
+    const authorName = prompt.author_name || 'An\u00f4nimo';
+
+    return `
+        <div class="prompt-card">
+            <div class="card-header">
+                <span class="card-category ${catClass}">${catLabel}</span>
+                <div class="card-actions-top">
+                    ${canDelete ? `<button class="btn-icon delete btn-delete" data-id="${prompt.id}" data-table="${tableName}" title="Excluir">&#128465;</button>` : ''}
+                </div>
+            </div>
+            <h3 class="card-title">${escapeHtml(prompt.title)}</h3>
+            <p class="card-description">${escapeHtml(prompt.description || '')}</p>
+            <div class="card-prompt expandable ${isLong ? 'collapsed' : ''}">${escapeHtml(prompt.content)}</div>
+            <div class="card-footer">
+                <span class="card-author">${currentTab === 'comunidade' ? 'por ' + escapeHtml(authorName) : (currentTab === 'oficial' ? 'Oficial EJUS' : 'Pessoal')}</span>
+                <button class="btn-copy" data-content="${escapeAttr(prompt.content)}">Copiar</button>
+            </div>
+        </div>
+    `;
+}
+
+// ===== MODAL =====
+function openNewPromptModal() {
+    document.getElementById('promptForm').reset();
+    document.getElementById('promptId').value = '';
+
+    if (currentTab === 'oficial') {
+        document.getElementById('modalTitle').textContent = 'Novo Prompt Oficial';
+        document.getElementById('communityNotice').style.display = 'none';
+    } else if (currentTab === 'comunidade') {
+        document.getElementById('modalTitle').textContent = 'Compartilhar Prompt com a Comunidade';
+        document.getElementById('communityNotice').style.display = 'block';
+    } else {
+        document.getElementById('modalTitle').textContent = 'Novo Prompt Pessoal';
+        document.getElementById('communityNotice').style.display = 'none';
+    }
+
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+async function handlePromptSubmit(e) {
+    e.preventDefault();
+
+    const title = document.getElementById('promptTitle').value.trim();
+    const category = document.getElementById('promptCategory').value;
+    const description = document.getElementById('promptDescription').value.trim();
+    const content = document.getElementById('promptContent').value.trim();
+
+    if (!title || !category || !content) {
+        showToast('Preencha todos os campos obrigat\u00f3rios.', 'error');
+        return;
+    }
+
+    try {
+        if (currentTab === 'oficial') {
+            const { error } = await supabase.from('prompts').insert({
+                title, category, description, content,
+                created_by: currentUser.id,
+                is_published: true
+            });
+            if (error) throw error;
+            showToast('Prompt oficial publicado!', 'success');
+
+        } else if (currentTab === 'comunidade') {
+            // Get user name
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('full_name')
+                .eq('id', currentUser.id)
+                .single();
+
+            const { error } = await supabase.from('community_prompts').insert({
+                title, category, description, content,
+                user_id: currentUser.id,
+                author_name: profile?.full_name || currentUser.email.split('@')[0]
+            });
+            if (error) throw error;
+            showToast('Prompt compartilhado com a comunidade!', 'success');
+
+        } else {
+            const { error } = await supabase.from('personal_prompts').insert({
+                title, category, description, content,
+                user_id: currentUser.id
+            });
+            if (error) throw error;
+            showToast('Prompt pessoal salvo!', 'success');
+        }
+
+        closeModal();
+        await loadPrompts();
+
+    } catch (err) {
+        showToast('Erro ao salvar: ' + err.message, 'error');
+        console.error(err);
+    }
+}
+
+async function deletePrompt(id, tableName) {
+    if (!confirm('Tem certeza que deseja excluir este prompt?')) return;
+
+    try {
+        const { error } = await supabase.from(tableName).delete().eq('id', id);
+        if (error) throw error;
+        showToast('Prompt exclu\u00eddo.', 'info');
+        await loadPrompts();
+    } catch (err) {
+        showToast('Erro ao excluir: ' + err.message, 'error');
+    }
+}
+
+// ===== COPY =====
+function copyPrompt(btn) {
+    const content = btn.dataset.content;
+    navigator.clipboard.writeText(content).then(() => {
+        btn.classList.add('copied');
+        btn.textContent = 'Copiado!';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.textContent = 'Copiar';
+        }, 2000);
+    }).catch(() => {
+        // Fallback
+        const textarea = document.createElement('textarea');
+        textarea.value = content;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        btn.classList.add('copied');
+        btn.textContent = 'Copiado!';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.textContent = 'Copiar';
+        }, 2000);
+    });
+}
+
+// ===== UTILS =====
+function showLoading(show) {
+    document.getElementById('loadingState').style.display = show ? 'block' : 'none';
+    if (show) {
+        document.getElementById('promptsGrid').innerHTML = '';
+        document.getElementById('emptyState').style.display = 'none';
+    }
+}
+
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+function debounce(fn, delay) {
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), delay);
+    };
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function escapeAttr(text) {
+    return text.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>
