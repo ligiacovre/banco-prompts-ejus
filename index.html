@@ -606,15 +606,22 @@ function setupEventListeners() {
 }
 
 async function handleGoogleLogin() {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: window.location.origin
+    try {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) throw error;
+        // signInWithOAuth retorna uma URL para redirecionar
+        if (data?.url) {
+            window.location.href = data.url;
         }
-    });
-    if (error) {
+    } catch (err) {
+        console.error('Google login error:', err);
         document.getElementById('authMsg').className = 'auth-msg error';
-        document.getElementById('authMsg').textContent = 'Erro ao conectar com Google: ' + error.message;
+        document.getElementById('authMsg').textContent = 'Erro ao conectar com Google: ' + (err.message || 'tente novamente');
     }
 }
 
