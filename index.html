@@ -528,14 +528,23 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- ===== SUPABASE CDN ===== -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <script>
 // ===== CONFIG =====
 const SUPABASE_URL = 'https://iinywkixyzqvjfegvsff.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_CKR_NkfYjtHKFCpcO0Q3ag_FcLBALIJ';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase;
+try {
+    // A SDK UMD expoe window.supabase com createClient
+    const sb = window.supabase;
+    supabase = sb.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase inicializado com sucesso');
+} catch (e) {
+    console.error('Erro ao inicializar Supabase:', e);
+    alert('Erro ao conectar com o banco de dados. Recarregue a p\u00e1gina.');
+}
 
 // ===== STATE =====
 let currentUser = null;
